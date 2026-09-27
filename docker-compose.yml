@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: power_utility
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./database/migrations:/docker-entrypoint-initdb.d/01-migrations
+      - ./database/seeds:/docker-entrypoint-initdb.d/02-seeds
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: power_utility
+      JWT_SECRET: development-secret
+      PORT: 4000
+    ports:
+      - '4000:4000'
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:4000
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
