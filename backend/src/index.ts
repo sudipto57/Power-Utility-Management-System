@@ -1,6 +1,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import { z } from 'zod';
@@ -10,6 +11,15 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(
+  '/api',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 200,
+    standardHeaders: true,
+    legacyHeaders: false
+  })
+);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL ?? 'postgresql://db:5432/power_utility'
